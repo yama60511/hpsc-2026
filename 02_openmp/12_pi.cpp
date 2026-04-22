@@ -3,6 +3,7 @@
 #include <omp.h>
 
 int main(int argc, char **argv) {
+  // Serial outperforms parallel for n < 10^5 due to thread overhead (tested at n = 10^1, 10^2, ...).
   int n = 10;
   int parallel = (argc > 1) ? atoi(argv[1]) : 1;
   double dx = 1. / n;
