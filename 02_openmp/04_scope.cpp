@@ -4,7 +4,7 @@
 int main() {
   int a = 0;
   int b[1] = {0};
-#pragma omp parallel for
+#pragma omp parallel for private(a)
   for(int i=0; i<8; i++) {
     a = omp_get_thread_num();
     b[0] = omp_get_thread_num();
