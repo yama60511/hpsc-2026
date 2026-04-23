@@ -33,23 +33,44 @@ int main(int argc, char **argv) {
       }
     }
   } else {
-    std::vector<int> mark(n,0);
-    for (int i=1; i<range; i++)
-      mark[offset[i]] = 1;
-
-    std::vector<int> b(n);
+// Parallel version 3
 #pragma omp parallel
-    for (int j=1; j<n; j<<=1) {
-#pragma omp for
-      for (int i=0; i<n; i++)
-        b[i] = mark[i];
-#pragma omp for
-      for (int i=j; i<n; i++)
-        mark[i] += b[i-j];
-    }
-#pragma omp parallel for
-    for (int i=0; i<n; i++)
-      key[i] = mark[i];
+      for (int r = 0; r < range; r++) {
+        int start = offset[r];
+        int end = (r == range - 1) ? n : offset[r + 1];
+#pragma omp for nowait
+        for (int p = start; p < end; p++) {
+            key[p] = r;
+        }
+      }
+// Parallel version 1
+//    std::vector<int> mark(n,0);
+//    for (int i=1; i<range; i++)
+//      mark[offset[i]] = 1;
+//
+//    std::vector<int> b(n);
+//#pragma omp parallel
+//    for (int j=1; j<n; j<<=1) {
+//#pragma omp for
+//      for (int i=0; i<n; i++)
+//        b[i] = mark[i];
+//#pragma omp for
+//      for (int i=j; i<n; i++)
+//        mark[i] += b[i-j];
+//    }
+//#pragma omp parallel for
+//    for (int i=0; i<n; i++)
+//      key[i] = mark[i];
+
+// Parallel version 2
+//#pragma omp parallel for
+//    for (int p = 0; p < n; p++) {
+//      int r = 0;
+//      while (r < range - 1 && p >= offset[r + 1]) {
+//        r++;
+//      }
+//      key[p] = r;
+//    }
   }
   double t1 = omp_get_wtime();
 
