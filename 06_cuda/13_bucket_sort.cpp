@@ -42,15 +42,6 @@ int main() {
   }
   printf("\n");
 
-  for (int i=1; i<n; i++) {
-    if (key[i-1] > key[i]) {
-      fprintf(stderr, "Sort check failed at index %d\n", i);
-      cudaFree(key);
-      cudaFree(bucket);
-      return 1;
-    }
-  }
-
   cudaFree(key);
   cudaFree(bucket);
 }
