@@ -1,24 +1,36 @@
 #include <cstdio>
 #include <cstdlib>
-#include <vector>
+
+__global__ void count_bucket(const int *key, int *bucket, int n) {
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  if (i < n) {
+    atomicAdd(&bucket[key[i]], 1);
+  }
+}
 
 int main() {
   int n = 50;
   int range = 5;
-  std::vector<int> key(n);
+
+  int *key;
+  cudaMallocManaged(&key, n*sizeof(int));
   for (int i=0; i<n; i++) {
     key[i] = rand() % range;
     printf("%d ",key[i]);
   }
   printf("\n");
 
-  std::vector<int> bucket(range); 
+  int *bucket;
+  cudaMallocManaged(&bucket, range*sizeof(int));
   for (int i=0; i<range; i++) {
     bucket[i] = 0;
   }
-  for (int i=0; i<n; i++) {
-    bucket[key[i]]++;
-  }
+
+  int threads = 256;
+  int blocks = (n + threads - 1) / threads;
+  count_bucket<<<blocks, threads>>>(key, bucket, n);
+  cudaDeviceSynchronize();
+
   for (int i=0, j=0; i<range; i++) {
     for (; bucket[i]>0; bucket[i]--) {
       key[j++] = i;
@@ -29,4 +41,16 @@ int main() {
     printf("%d ",key[i]);
   }
   printf("\n");
+
+  for (int i=1; i<n; i++) {
+    if (key[i-1] > key[i]) {
+      fprintf(stderr, "Sort check failed at index %d\n", i);
+      cudaFree(key);
+      cudaFree(bucket);
+      return 1;
+    }
+  }
+
+  cudaFree(key);
+  cudaFree(bucket);
 }
