@@ -445,8 +445,6 @@ int main(int argc, const char **argv) {
   printf("CUBLAS_GEMMEX: %.2f Gflops, WMMA_%s: %.2f Gflops, ratio: %.2f%%\n",
          cublas_flops, kKernelName, kernel_flops,
          100.0 * kernel_flops / cublas_flops);
-  printf("CUBLAS: %.2f Gflops, CUTLASS: %.2f Gflops\n", cublas_flops,
-         kernel_flops);
 
   long double sum_abs = 0.0L;
   long double sum_ref_abs = 0.0L;
